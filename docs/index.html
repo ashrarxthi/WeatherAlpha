@@ -5,88 +5,113 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WeatherAlpha · HB_BUSAVG</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #07090f; --panel: #0c1018; --border: #151d28;
-    --accent: #00d4ff; --elevated: #ff4444; --warn: #ffaa00;
-    --text: #667788; --bright: #dde8f0; --green: #00c896;
-    --grid: #0f1520;
+    --bg: #f8faf8;
+    --panel: #ffffff;
+    --border: #e4ebe4;
+    --border2: #d0dbd0;
+    --accent: #1a7a4a;
+    --accent-light: #e8f5ee;
+    --accent2: #2da65e;
+    --elevated: #c0392b;
+    --elevated-light: #fdf0ef;
+    --warn: #d4841a;
+    --warn-light: #fef6ec;
+    --text: #6b7c6b;
+    --text2: #3d4f3d;
+    --bright: #1a2e1a;
+    --grid: #eef3ee;
+    --sidebar: #f2f7f2;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--bright); font-family: 'IBM Plex Mono', monospace; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  body { background: var(--bg); color: var(--bright); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
 
   /* TOP BAR */
-  #topbar { background: var(--panel); border-bottom: 1px solid var(--border); height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
-  #topbar .logo { display: flex; align-items: center; gap: 10px; }
-  #topbar .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-  #topbar .brand { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: 0.18em; }
-  #topbar .sub { color: var(--text); font-size: 10px; margin-left: 14px; }
-  #topbar .meta { display: flex; gap: 20px; font-size: 10px; color: var(--text); }
-  .warn-text { color: var(--warn); }
+  #topbar { background: var(--panel); border-bottom: 1px solid var(--border); height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  #topbar .logo { display: flex; align-items: center; gap: 12px; }
+  #topbar .brand-wrap { display: flex; align-items: center; gap: 8px; }
+  #topbar .brand-icon { width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px; letter-spacing: -0.5px; }
+  #topbar .brand { color: var(--bright); font-weight: 700; font-size: 15px; letter-spacing: -0.3px; }
+  #topbar .divider { width: 1px; height: 20px; background: var(--border2); margin: 0 4px; }
+  #topbar .sub { color: var(--text); font-size: 12px; }
+  #topbar .meta { display: flex; align-items: center; gap: 16px; font-size: 11px; color: var(--text); }
+  .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; }
+  .badge-warn { background: var(--warn-light); color: var(--warn); }
+  .badge-ok { background: var(--accent-light); color: var(--accent); }
 
   /* LAYOUT */
   #main { display: flex; flex: 1; overflow: hidden; }
 
   /* SIDEBAR */
-  #sidebar { width: 175px; background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
-  #sidebar .sidebar-header { padding: 10px 14px 6px; font-size: 9px; letter-spacing: 0.1em; color: var(--text); border-bottom: 1px solid var(--border); }
-  .day-item { padding: 9px 14px; cursor: pointer; border-left: 2px solid transparent; border-bottom: 1px solid var(--grid); transition: all 0.1s; }
-  .day-item:hover { background: rgba(0,212,255,0.03); }
-  .day-item.active { background: rgba(0,212,255,0.05); border-left-color: var(--accent); }
+  #sidebar { width: 180px; background: var(--sidebar); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
+  #sidebar .sidebar-header { padding: 12px 14px 8px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: var(--text); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .day-item { padding: 10px 14px; cursor: pointer; border-left: 3px solid transparent; border-bottom: 1px solid var(--border); transition: all 0.12s; }
+  .day-item:hover { background: var(--accent-light); }
+  .day-item.active { background: var(--accent-light); border-left-color: var(--accent); }
   .day-item .row1 { display: flex; justify-content: space-between; align-items: center; }
-  .day-item .dname { font-size: 11px; color: var(--text); }
-  .day-item.active .dname { color: var(--bright); font-weight: 600; }
-  .day-item .dsig { font-size: 10px; }
-  .day-item .row2 { display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; color: var(--text); }
+  .day-item .dname { font-size: 12px; font-weight: 500; color: var(--text2); }
+  .day-item.active .dname { color: var(--accent); font-weight: 600; }
+  .day-item .dsig { font-size: 9px; font-weight: 600; letter-spacing: 0.05em; padding: 2px 5px; border-radius: 3px; }
+  .dsig-elevated { background: var(--elevated-light); color: var(--elevated); }
+  .dsig-moderate { color: var(--text); }
+  .day-item .row2 { display: flex; justify-content: space-between; margin-top: 3px; font-size: 11px; color: var(--text); }
 
   /* CONTENT */
-  #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
 
   /* KPI ROW */
-  #kpis { display: flex; gap: 1px; padding: 1px; flex-shrink: 0; border-bottom: 1px solid var(--border); }
-  .kpi { background: var(--panel); border: 1px solid var(--border); padding: 11px 16px; flex: 1; }
-  .kpi .klabel { font-size: 9px; letter-spacing: 0.12em; color: var(--text); margin-bottom: 5px; }
-  .kpi .kvalue { font-size: 19px; font-weight: 700; }
-  .kpi .ksub { font-size: 9px; color: var(--text); margin-top: 3px; }
+  #kpis { display: flex; gap: 12px; padding: 12px 16px; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--panel); }
+  .kpi { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; flex: 1; }
+  .kpi .klabel { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin-bottom: 6px; }
+  .kpi .kvalue { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--bright); }
+  .kpi .ksub { font-size: 10px; color: var(--text); margin-top: 3px; }
 
   /* STATS ROW */
-  #stats { display: flex; gap: 1px; padding: 1px 1px 0; flex-shrink: 0; border-bottom: 1px solid var(--border); }
-  .stat { background: var(--panel); padding: 8px 14px; flex: 1; }
-  .stat .slabel { font-size: 8px; letter-spacing: 0.1em; color: var(--text); margin-bottom: 4px; }
-  .stat .svalue { font-size: 13px; font-weight: 600; color: var(--bright); }
+  #stats { display: flex; gap: 0; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--panel); }
+  .stat { padding: 10px 16px; flex: 1; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat .slabel { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }
+  .stat .svalue { font-size: 13px; font-weight: 600; color: var(--bright); font-family: 'DM Mono', monospace; }
 
   /* TABS */
-  #tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .tab { padding: 10px 18px; font-size: 10px; letter-spacing: 0.08em; cursor: pointer; color: var(--text); border-bottom: 2px solid transparent; transition: all 0.15s; font-family: 'IBM Plex Mono', monospace; background: none; border-top: none; border-left: none; border-right: none; }
+  #tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--panel); padding: 0 16px; }
+  .tab { padding: 10px 14px; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text); border-bottom: 2px solid transparent; transition: all 0.15s; font-family: 'Inter', sans-serif; background: none; border-top: none; border-left: none; border-right: none; margin-right: 4px; }
   .tab:hover { color: var(--accent); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0,212,255,0.04); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 
   /* CHART AREA */
   #chart-area { flex: 1; padding: 16px 20px; overflow: hidden; display: flex; flex-direction: column; }
-  #chart-area .chart-title { font-size: 10px; color: var(--text); margin-bottom: 12px; letter-spacing: 0.08em; }
-  .chart-wrap { flex: 1; position: relative; min-height: 0; }
+  #chart-area .chart-title { font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 12px; letter-spacing: 0.02em; }
+  .chart-wrap { flex: 1; position: relative; min-height: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
   .chart-wrap canvas { max-height: 100% !important; }
 
   /* RIGHT PANEL */
-  #signal-panel { width: 215px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
-  #signal-panel .sp-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 9px; letter-spacing: 0.1em; color: var(--text); }
-  #signal-badge { padding: 14px; border-bottom: 1px solid var(--border); }
-  #signal-badge .badge-inner { border-radius: 3px; padding: 12px 14px; text-align: center; }
-  #signal-badge .badge-val { font-size: 22px; font-weight: 700; letter-spacing: 0.08em; }
-  #signal-badge .badge-label { font-size: 9px; color: var(--text); margin-top: 4px; letter-spacing: 0.08em; }
-  #signal-metrics { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  #signal-panel { width: 220px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  #signal-panel .sp-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
+  #signal-badge { padding: 16px; border-bottom: 1px solid var(--border); }
+  #signal-badge .badge-inner { border-radius: 8px; padding: 14px; text-align: center; }
+  #signal-badge .badge-val { font-size: 18px; font-weight: 700; letter-spacing: 0.05em; }
+  #signal-badge .badge-label { font-size: 10px; color: var(--text); margin-top: 4px; font-weight: 500; }
+  #signal-metrics { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
   .metric-row { display: flex; justify-content: space-between; align-items: center; }
-  .metric-row .ml { font-size: 9px; color: var(--text); letter-spacing: 0.08em; }
-  .metric-row .mv { font-size: 12px; font-weight: 600; color: var(--bright); }
-  #signal-thesis { padding: 12px 14px; flex: 1; overflow-y: auto; }
-  #signal-thesis .thesis-label { font-size: 9px; letter-spacing: 0.1em; color: var(--text); margin-bottom: 8px; }
-  #signal-thesis .thesis-body { font-size: 10px; color: var(--text); line-height: 1.8; }
-  #elevated-list { padding: 12px 14px; border-top: 1px solid var(--border); }
-  #elevated-list .el-header { font-size: 9px; letter-spacing: 0.1em; color: var(--text); margin-bottom: 8px; }
-  .el-row { display: flex; justify-content: space-between; padding: 5px 0; cursor: pointer; border-bottom: 1px solid var(--grid); }
-  .el-row .el-date { font-size: 10px; color: var(--elevated); }
-  .el-row .el-spike { font-size: 10px; color: var(--text); }
+  .metric-row .ml { font-size: 10px; font-weight: 500; color: var(--text); }
+  .metric-row .mv { font-size: 12px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--bright); }
+  #signal-thesis { padding: 14px 16px; flex: 1; overflow-y: auto; }
+  #signal-thesis .thesis-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
+  #signal-thesis .thesis-body { font-size: 11px; color: var(--text2); line-height: 1.7; }
+  #elevated-list { padding: 12px 16px; border-top: 1px solid var(--border); }
+  #elevated-list .el-header { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
+  .el-row { display: flex; justify-content: space-between; padding: 6px 0; cursor: pointer; border-bottom: 1px solid var(--border); }
+  .el-row:hover .el-date { color: var(--elevated); text-decoration: underline; }
+  .el-row .el-date { font-size: 11px; font-weight: 500; color: var(--elevated); }
+  .el-row .el-spike { font-size: 11px; color: var(--text); font-family: 'DM Mono', monospace; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -94,21 +119,23 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <div class="logo">
-    <div class="dot"></div>
-    <span class="brand">WEATHERALPHA</span>
-    <span style="color:#151d28;font-size:18px;margin:0 4px">│</span>
-    <span class="sub">ERCOT · HB_BUSAVG · 15-DAY PRICE INTELLIGENCE</span>
+    <div class="brand-wrap">
+      <div class="brand-icon">WA</div>
+      <span class="brand">WeatherAlpha</span>
+    </div>
+    <div class="divider"></div>
+    <span class="sub">ERCOT · HB_BUSAVG · 15-Day Price Intelligence</span>
   </div>
   <div class="meta">
-    <span class="warn-text">⚠ SYNTHETIC PROXY · WEATHERNEXT PENDING</span>
-    <span>RUN: <span style="color:var(--bright)">2026-03-11 22:09 UTC</span></span>
+    <span class="badge badge-warn">⚠ Synthetic Proxy · WeatherNext Pending</span>
+    <span>Updated: <strong>2026-03-11 22:24 UTC</strong></span>
   </div>
 </div>
 
 <div id="main">
   <!-- SIDEBAR -->
   <div id="sidebar">
-    <div class="sidebar-header">FORECAST DAYS</div>
+    <div class="sidebar-header">Forecast Days</div>
     <div id="day-list"></div>
   </div>
 
@@ -117,10 +144,10 @@
     <div id="kpis"></div>
     <div id="stats"></div>
     <div id="tabs">
-      <button class="tab active" onclick="switchTab('price', this)">PRICE FORECAST</button>
-      <button class="tab" onclick="switchTab('spike', this)">SPIKE PROBABILITY</button>
-      <button class="tab" onclick="switchTab('supply', this)">SUPPLY / DEMAND</button>
-      <button class="tab" onclick="switchTab('weather', this)">WEATHER SIGNALS</button>
+      <button class="tab active" onclick="switchTab('price', this)">Price Forecast</button>
+      <button class="tab" onclick="switchTab('spike', this)">Spike Probability</button>
+      <button class="tab" onclick="switchTab('supply', this)">Supply / Demand</button>
+      <button class="tab" onclick="switchTab('weather', this)">Weather Signals</button>
     </div>
     <div id="chart-area">
       <div class="chart-title" id="chart-title"></div>
@@ -132,20 +159,20 @@
 
   <!-- SIGNAL PANEL -->
   <div id="signal-panel">
-    <div class="sp-header" id="sp-header">TRADING SIGNAL</div>
+    <div class="sp-header" id="sp-header">Trading Signal</div>
     <div id="signal-badge">
       <div class="badge-inner" id="badge-inner">
         <div class="badge-val" id="badge-val"></div>
-        <div class="badge-label">RISK LEVEL</div>
+        <div class="badge-label">Risk Level</div>
       </div>
     </div>
     <div id="signal-metrics"></div>
     <div id="signal-thesis">
-      <div class="thesis-label">ALPHA THESIS</div>
+      <div class="thesis-label">Alpha Thesis</div>
       <div class="thesis-body" id="thesis-body"></div>
     </div>
     <div id="elevated-list">
-      <div class="el-header">ELEVATED DAYS</div>
+      <div class="el-header">Elevated Days</div>
       <div id="el-rows"></div>
     </div>
   </div>
@@ -158,15 +185,24 @@ let activeTab = 'price';
 let chart = null;
 
 const C = {
-  accent: '#00d4ff', elevated: '#ff4444', warn: '#ffaa00',
-  text: '#667788', bright: '#dde8f0', green: '#00c896',
-  grid: '#0f1520', panel: '#0c1018',
+  accent:  '#1a7a4a',
+  accent2: '#2da65e',
+  accentA: 'rgba(26,122,74,0.1)',
+  elevated: '#c0392b',
+  elevatedA: 'rgba(192,57,43,0.08)',
+  warn:    '#d4841a',
+  warnA:   'rgba(212,132,26,0.1)',
+  text:    '#6b7c6b',
+  bright:  '#1a2e1a',
+  green2:  '#27ae60',
+  grid:    '#eef3ee',
+  panel:   '#ffffff',
 };
 
 function sc(signal) { return signal === 'ELEVATED' ? C.elevated : C.accent; }
 
 function fmtDate(iso) {
-  const d = new Date(iso);
+  const d = new Date(iso + 'T00:00:00');
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
@@ -176,11 +212,13 @@ function buildSidebar() {
     <div class="day-item ${i === 0 ? 'active' : ''}" onclick="selectDay(${i})" id="day-${i}">
       <div class="row1">
         <span class="dname">${fmtDate(d.date)}</span>
-        <span class="dsig" style="color:${sc(d.signal)}">${d.signal === 'ELEVATED' ? '● ELEV' : '·'}</span>
+        ${d.signal === 'ELEVATED'
+          ? `<span class="dsig dsig-elevated">ELEV</span>`
+          : `<span class="dsig dsig-moderate"></span>`}
       </div>
       <div class="row2">
         <span>${d.temp}°F</span>
-        <span style="color:${d.spike > 50 ? C.elevated : C.text}">${d.spike.toFixed(0)}%</span>
+        <span style="color:${d.spike > 50 ? C.elevated : C.text};font-weight:${d.spike > 50 ? 600 : 400}">${d.spike.toFixed(0)}%</span>
       </div>
     </div>
   `).join('');
@@ -194,23 +232,39 @@ function buildKPIs() {
   const d         = DATA[activeDay];
 
   document.getElementById('kpis').innerHTML = `
-    <div class="kpi"><div class="klabel">PEAK FORECAST PRICE</div><div class="kvalue" style="color:${C.elevated}">$${peakPrice.toFixed(0)}/MWh</div><div class="ksub">${fmtDate(peakDay.date)} · highest in window</div></div>
-    <div class="kpi"><div class="klabel">AVG SPIKE PROBABILITY</div><div class="kvalue" style="color:${C.warn}">${avgSpike}%</div><div class="ksub">across all 15 forecast days</div></div>
-    <div class="kpi"><div class="klabel">ELEVATED RISK DAYS</div><div class="kvalue" style="color:${C.elevated}">${elevated.length}</div><div class="ksub">${elevated.map(x => fmtDate(x.date)).join(' · ')}</div></div>
-    <div class="kpi"><div class="klabel">SELECTED · SIGNAL</div><div class="kvalue" style="color:${sc(d.signal)}">${d.signal}</div><div class="ksub">${d.spike.toFixed(1)}% spike · $${d.price.toFixed(0)}/MWh pred</div></div>
+    <div class="kpi">
+      <div class="klabel">Peak Forecast Price</div>
+      <div class="kvalue" style="color:${C.elevated}">$${peakPrice.toFixed(0)}<span style="font-size:13px;font-weight:500">/MWh</span></div>
+      <div class="ksub">${fmtDate(peakDay.date)} · highest in 15-day window</div>
+    </div>
+    <div class="kpi">
+      <div class="klabel">Avg Spike Probability</div>
+      <div class="kvalue" style="color:${C.warn}">${avgSpike}<span style="font-size:13px;font-weight:500">%</span></div>
+      <div class="ksub">across all 15 forecast days</div>
+    </div>
+    <div class="kpi">
+      <div class="klabel">Elevated Risk Days</div>
+      <div class="kvalue" style="color:${C.elevated}">${elevated.length}</div>
+      <div class="ksub">${elevated.map(x => fmtDate(x.date)).join(' · ')}</div>
+    </div>
+    <div class="kpi">
+      <div class="klabel">Selected · Signal</div>
+      <div class="kvalue" style="color:${sc(d.signal)};font-size:16px">${d.signal}</div>
+      <div class="ksub">${d.spike.toFixed(1)}% spike · $${d.price.toFixed(0)}/MWh predicted</div>
+    </div>
   `;
 }
 
 function buildStats() {
   const d = DATA[activeDay];
   const stats = [
-    { label: 'PRED PRICE', value: `$${d.price.toFixed(2)}/MWh`, color: d.price > 100 ? C.elevated : C.green },
-    { label: 'DEMAND', value: `${(d.demand/1000).toFixed(1)}K MW` },
-    { label: 'RENEWABLES', value: `${(d.renewables/1000).toFixed(1)}K MW`, color: C.green },
-    { label: 'GRID TIGHTNESS', value: `${(d.tightness/1000).toFixed(1)}K MW` },
-    { label: 'WIND SPEED', value: `${d.wind} mph` },
-    { label: 'CLOUD COVER', value: `${d.cloud}%` },
-    { label: 'TEMP (MEAN/MAX)', value: `${d.temp}° / ${d.tempMax}°F` },
+    { label: 'Pred Price', value: `$${d.price.toFixed(2)}/MWh`, color: d.price > 100 ? C.elevated : C.accent },
+    { label: 'Demand', value: `${(d.demand/1000).toFixed(1)}K MW` },
+    { label: 'Renewables', value: `${(d.renewables/1000).toFixed(1)}K MW`, color: C.accent },
+    { label: 'Grid Tightness', value: `${(d.tightness/1000).toFixed(1)}K MW` },
+    { label: 'Wind Speed', value: `${d.wind} mph` },
+    { label: 'Cloud Cover', value: `${d.cloud}%` },
+    { label: 'Temp (Mean / Max)', value: `${d.temp}° / ${d.tempMax}°F` },
   ];
   document.getElementById('stats').innerHTML = stats.map(s => `
     <div class="stat">
@@ -226,21 +280,21 @@ function buildSignal() {
   const isElev   = d.signal === 'ELEVATED';
   const color     = sc(d.signal);
 
-  document.getElementById('sp-header').textContent = `TRADING SIGNAL · ${fmtDate(d.date).toUpperCase()}`;
+  document.getElementById('sp-header').textContent = `Signal · ${fmtDate(d.date)}`;
 
   const badge = document.getElementById('badge-inner');
-  badge.style.background = isElev ? 'rgba(255,68,68,0.08)' : 'rgba(0,212,255,0.06)';
-  badge.style.border      = `1px solid ${color}33`;
-  document.getElementById('badge-val').textContent  = d.signal;
-  document.getElementById('badge-val').style.color  = color;
+  badge.style.background = isElev ? 'rgba(192,57,43,0.08)' : 'rgba(26,122,74,0.08)';
+  badge.style.border = `1px solid ${color}33`;
+  document.getElementById('badge-val').textContent = d.signal;
+  document.getElementById('badge-val').style.color = color;
 
   const metrics = [
-    { label: 'SPIKE PROB', value: `${d.spike.toFixed(1)}%`, color: d.spike > 50 ? C.elevated : C.warn },
-    { label: 'PRED PRICE', value: `$${d.price.toFixed(2)}`, color: d.price > 100 ? C.elevated : C.green },
-    { label: 'TIGHTNESS',  value: `${(d.tightness/1000).toFixed(1)}K MW` },
-    { label: 'RENEWABLES', value: `${(d.renewables/1000).toFixed(1)}K MW`, color: C.green },
-    { label: 'WIND',       value: `${d.wind} mph` },
-    { label: 'CLOUD',      value: `${d.cloud}%` },
+    { label: 'Spike Probability', value: `${d.spike.toFixed(1)}%`, color: d.spike > 50 ? C.elevated : C.warn },
+    { label: 'Predicted Price',   value: `$${d.price.toFixed(2)}`, color: d.price > 100 ? C.elevated : C.accent },
+    { label: 'Grid Tightness',    value: `${(d.tightness/1000).toFixed(1)}K MW` },
+    { label: 'Renewables',        value: `${(d.renewables/1000).toFixed(1)}K MW`, color: C.accent },
+    { label: 'Wind Speed',        value: `${d.wind} mph` },
+    { label: 'Cloud Cover',       value: `${d.cloud}%` },
   ];
   document.getElementById('signal-metrics').innerHTML = metrics.map(m => `
     <div class="metric-row">
@@ -250,16 +304,18 @@ function buildSignal() {
   `).join('');
 
   const thesis = isElev
-    ? `<span style="color:${C.elevated}">High cloud cover (${d.cloud}%)</span> suppressing solar output. Wind at ${d.wind} mph. Tightness at ${(d.tightness/1000).toFixed(1)}K MW. <span style="color:${C.warn}">Spike probability exceeds 50% threshold.</span> Watch for RTM/DAM divergence.`
-    : `Wind at ${d.wind} mph delivering ${(d.renewables/1000).toFixed(1)}K MW renewables. Grid balanced at ${(d.tightness/1000).toFixed(1)}K MW tightness. <span style="color:${C.green}">DAM prices likely subdued</span> barring demand shock.`;
+    ? `<span style="color:${C.elevated};font-weight:600">High cloud cover (${d.cloud}%)</span> is suppressing solar output. Wind at ${d.wind} mph below seasonal average. Tightness at ${(d.tightness/1000).toFixed(1)}K MW. <span style="color:${C.warn};font-weight:600">Spike probability exceeds 50% threshold.</span> Watch for RTM/DAM divergence.`
+    : `Wind at ${d.wind} mph delivering ${(d.renewables/1000).toFixed(1)}K MW of renewable output. Grid balanced at ${(d.tightness/1000).toFixed(1)}K MW tightness. <span style="color:${C.accent};font-weight:600">DAM prices likely to remain subdued</span> barring an unexpected demand shock.`;
   document.getElementById('thesis-body').innerHTML = thesis;
 
-  document.getElementById('el-rows').innerHTML = elevated.map((f, i) => `
-    <div class="el-row" onclick="selectDay(${DATA.findIndex(x => x.date === f.date)})">
-      <span class="el-date">${fmtDate(f.date)}</span>
-      <span class="el-spike">${f.spike.toFixed(0)}% spike</span>
-    </div>
-  `).join('');
+  document.getElementById('el-rows').innerHTML = elevated.length
+    ? elevated.map((f) => `
+        <div class="el-row" onclick="selectDay(${DATA.findIndex(x => x.date === f.date)})">
+          <span class="el-date">${fmtDate(f.date)}</span>
+          <span class="el-spike">${f.spike.toFixed(0)}% spike</span>
+        </div>
+      `).join('')
+    : '<div style="font-size:11px;color:var(--text)">None in window</div>';
 }
 
 function selectDay(i) {
@@ -281,10 +337,10 @@ function switchTab(tab, btn) {
 
 function renderChart() {
   const titles = {
-    price:   'DAM SETTLEMENT POINT PRICE FORECAST  ·  $/MWh  ·  HB_BUSAVG',
-    spike:   'SPIKE PROBABILITY  ·  %  ·  LOGISTIC REGRESSION ON GRID TIGHTNESS',
-    supply:  'DEMAND vs RENEWABLES vs GRID TIGHTNESS  ·  MW',
-    weather: 'TEMPERATURE + WIND + CLOUD COVER  ·  15-DAY WEATHER SIGNALS',
+    price:   'DAM Settlement Point Price Forecast  ·  $/MWh  ·  HB_BUSAVG',
+    spike:   'Spike Probability  ·  %  ·  Logistic Regression on Grid Tightness',
+    supply:  'Demand vs Renewables vs Grid Tightness  ·  MW',
+    weather: 'Temperature · Wind · Cloud Cover  ·  15-Day Weather Signals',
   };
   document.getElementById('chart-title').textContent = titles[activeTab];
 
@@ -292,12 +348,10 @@ function renderChart() {
   const ctx = document.getElementById('main-chart').getContext('2d');
   const labels = DATA.map(d => fmtDate(d.date));
 
-  const gridOpts = {
-    color: C.grid, drawBorder: false,
-  };
-  const tickOpts = {
-    color: C.text, font: { family: 'IBM Plex Mono', size: 9 },
-  };
+  const gridOpts = { color: C.grid, drawBorder: false };
+  const tickOpts = { color: C.text, font: { family: 'Inter', size: 10 } };
+
+  Chart.defaults.font.family = 'Inter';
 
   if (activeTab === 'price') {
     chart = new Chart(ctx, {
@@ -307,15 +361,15 @@ function renderChart() {
         datasets: [{
           label: 'Predicted Price',
           data: DATA.map(d => d.price),
-          borderColor: DATA.map((d, i) => i === activeDay ? C.bright : C.accent),
-          borderWidth: 2,
-          backgroundColor: 'rgba(0,212,255,0.08)',
+          borderColor: C.accent,
+          borderWidth: 2.5,
+          backgroundColor: C.accentA,
           fill: true,
-          tension: 0.3,
+          tension: 0.35,
           pointRadius: DATA.map((d, i) => i === activeDay ? 7 : d.signal === 'ELEVATED' ? 6 : 4),
           pointBackgroundColor: DATA.map(d => d.signal === 'ELEVATED' ? C.elevated : C.accent),
-          pointBorderColor: C.panel,
-          pointBorderWidth: 1.5,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
         }],
       },
       options: {
@@ -323,11 +377,10 @@ function renderChart() {
         onClick: (e, els) => { if (els.length) selectDay(els[0].index); },
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(2)}/MWh` } },
-          annotation: {} ,
+          tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(2)}/MWh` }, backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 },
         },
         scales: {
-          x: { grid: gridOpts, ticks: tickOpts, border: { color: C.grid } },
+          x: { grid: gridOpts, ticks: tickOpts, border: { color: '#e4ebe4' } },
           y: { grid: gridOpts, ticks: { ...tickOpts, callback: v => `$${v}` }, border: { display: false } },
         },
       },
@@ -344,9 +397,10 @@ function renderChart() {
           data: DATA.map(d => d.spike),
           backgroundColor: DATA.map((d, i) => {
             const base = d.spike > 50 ? C.elevated : d.spike > 45 ? C.warn : C.accent;
-            return i === activeDay ? base : base + '99';
+            return i === activeDay ? base : base + 'bb';
           }),
-          borderRadius: 2,
+          borderRadius: 4,
+          borderSkipped: false,
         }],
       },
       options: {
@@ -354,10 +408,10 @@ function renderChart() {
         onClick: (e, els) => { if (els.length) selectDay(els[0].index); },
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(1)}%` } },
+          tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(1)}%` }, backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 },
         },
         scales: {
-          x: { grid: gridOpts, ticks: tickOpts, border: { color: C.grid } },
+          x: { grid: gridOpts, ticks: tickOpts, border: { color: '#e4ebe4' } },
           y: { min: 0, max: 100, grid: gridOpts, ticks: { ...tickOpts, callback: v => `${v}%` }, border: { display: false } },
         },
       },
@@ -370,19 +424,19 @@ function renderChart() {
       data: {
         labels,
         datasets: [
-          { label: 'Demand', data: DATA.map(d => d.demand), borderColor: C.warn, borderWidth: 1.5, backgroundColor: 'rgba(255,170,0,0.07)', fill: true, tension: 0.3, pointRadius: 0 },
-          { label: 'Renewables', data: DATA.map(d => d.renewables), borderColor: C.green, borderWidth: 1.5, backgroundColor: 'rgba(0,200,150,0.07)', fill: true, tension: 0.3, pointRadius: 0 },
-          { label: 'Tightness', data: DATA.map(d => d.tightness), borderColor: C.elevated, borderWidth: 2, borderDash: [4, 2], backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 },
+          { label: 'Demand', data: DATA.map(d => d.demand), borderColor: C.warn, borderWidth: 2, backgroundColor: C.warnA, fill: true, tension: 0.3, pointRadius: 0 },
+          { label: 'Renewables', data: DATA.map(d => d.renewables), borderColor: C.accent, borderWidth: 2, backgroundColor: C.accentA, fill: true, tension: 0.3, pointRadius: 0 },
+          { label: 'Tightness', data: DATA.map(d => d.tightness), borderColor: C.elevated, borderWidth: 2, borderDash: [5, 3], backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 },
         ],
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { labels: { color: C.text, font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 12 } },
-          tooltip: { callbacks: { label: ctx => `${(ctx.parsed.y/1000).toFixed(1)}K MW` } },
+          legend: { labels: { color: C.text, font: { family: 'Inter', size: 10 }, boxWidth: 10, padding: 16 } },
+          tooltip: { callbacks: { label: ctx => `${(ctx.parsed.y/1000).toFixed(1)}K MW` }, backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 },
         },
         scales: {
-          x: { grid: gridOpts, ticks: tickOpts, border: { color: C.grid } },
+          x: { grid: gridOpts, ticks: tickOpts, border: { color: '#e4ebe4' } },
           y: { grid: gridOpts, ticks: { ...tickOpts, callback: v => `${(v/1000).toFixed(0)}K` }, border: { display: false } },
         },
       },
@@ -395,19 +449,20 @@ function renderChart() {
       data: {
         labels,
         datasets: [
-          { label: 'Temp Max °F', data: DATA.map(d => d.tempMax), borderColor: C.elevated, borderWidth: 1, backgroundColor: 'rgba(255,68,68,0.06)', fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'temp' },
+          { label: 'Temp Max °F', data: DATA.map(d => d.tempMax), borderColor: C.elevated, borderWidth: 1.5, backgroundColor: C.elevatedA, fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'temp' },
           { label: 'Temp Mean °F', data: DATA.map(d => d.temp), borderColor: C.warn, borderWidth: 2, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, yAxisID: 'temp' },
           { label: 'Wind mph', data: DATA.map(d => d.wind), borderColor: C.accent, borderWidth: 2, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, yAxisID: 'wind' },
-          { label: 'Cloud %', data: DATA.map(d => d.cloud), borderColor: C.text, borderWidth: 1, backgroundColor: 'rgba(102,119,136,0.15)', fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'wind' },
+          { label: 'Cloud %', data: DATA.map(d => d.cloud), borderColor: '#aab5aa', borderWidth: 1, backgroundColor: 'rgba(170,181,170,0.12)', fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'wind' },
         ],
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { labels: { color: C.text, font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 12 } },
+          legend: { labels: { color: C.text, font: { family: 'Inter', size: 10 }, boxWidth: 10, padding: 16 } },
+          tooltip: { backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 },
         },
         scales: {
-          x: { grid: gridOpts, ticks: tickOpts, border: { color: C.grid } },
+          x: { grid: gridOpts, ticks: tickOpts, border: { color: '#e4ebe4' } },
           temp: { type: 'linear', position: 'left', grid: gridOpts, ticks: { ...tickOpts, callback: v => `${v}°` }, border: { display: false } },
           wind: { type: 'linear', position: 'right', grid: { display: false }, ticks: { ...tickOpts, callback: v => `${v}` }, border: { display: false } },
         },
@@ -416,7 +471,6 @@ function renderChart() {
   }
 }
 
-// Init
 buildSidebar();
 buildKPIs();
 buildStats();
