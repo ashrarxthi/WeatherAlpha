@@ -367,6 +367,29 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
   .el-row .el-date {{ font-size: 11px; font-weight: 500; color: var(--elevated); }}
   .el-row .el-spike {{ font-size: 11px; color: var(--text); font-family: 'DM Mono', monospace; }}
 
+  /* SIGNAL PANEL extras */
+  .sp-section-header {{ padding: 10px 16px 6px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); border-top: 1px solid var(--border); }}
+  #summary-box {{ padding: 14px 16px; border-bottom: 1px solid var(--border); }}
+  #summary-box .sum-headline {{ font-size: 13px; font-weight: 600; color: var(--bright); line-height: 1.4; margin-bottom: 8px; }}
+  #summary-box .sum-body {{ font-size: 11px; color: var(--text); line-height: 1.7; }}
+  #next-alert-box {{ padding: 12px 16px; border-bottom: 1px solid var(--border); }}
+  #next-alert-box .nal-label {{ font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }}
+  .alert-row {{ display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; margin-bottom: 5px; cursor: pointer; transition: opacity 0.1s; }}
+  .alert-row:hover {{ opacity: 0.8; }}
+  .alert-row .ar-date {{ font-size: 12px; font-weight: 600; }}
+  .alert-row .ar-spike {{ font-size: 11px; font-family: 'DM Mono', monospace; }}
+  .alert-row .ar-days {{ font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }}
+  #signal-drivers {{ padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }}
+  .driver-row {{ display: flex; align-items: center; gap: 8px; }}
+  .driver-icon {{ width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }}
+  .driver-text {{ flex: 1; }}
+  .driver-label {{ font-size: 10px; font-weight: 600; color: var(--text2); }}
+  .driver-val {{ font-size: 11px; color: var(--text); }}
+  #signal-watch {{ padding: 12px 16px; }}
+  #signal-watch .watch-label {{ font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }}
+  #signal-watch .watch-item {{ font-size: 11px; color: var(--text2); line-height: 1.7; padding-left: 12px; position: relative; margin-bottom: 4px; }}
+  #signal-watch .watch-item::before {{ content: "→"; position: absolute; left: 0; color: var(--warn); font-weight: 600; }}
+
   /* Scrollbar */
   ::-webkit-scrollbar {{ width: 4px; }}
   ::-webkit-scrollbar-track {{ background: transparent; }}
@@ -418,22 +441,24 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
 
   <!-- SIGNAL PANEL -->
   <div id="signal-panel">
-    <div class="sp-header" id="sp-header">Trading Signal</div>
+    <div class="sp-header">15-Day Outlook</div>
+
+    <!-- Plain English Summary -->
+    <div id="summary-box"></div>
+
+    <!-- Next Alert -->
+    <div id="next-alert-box"></div>
+
+    <!-- Selected Day Detail -->
+    <div class="sp-section-header" id="sp-day-header">Selected Day</div>
     <div id="signal-badge">
       <div class="badge-inner" id="badge-inner">
         <div class="badge-val" id="badge-val"></div>
         <div class="badge-label">Risk Level</div>
       </div>
     </div>
-    <div id="signal-metrics"></div>
-    <div id="signal-thesis">
-      <div class="thesis-label">Alpha Thesis</div>
-      <div class="thesis-body" id="thesis-body"></div>
-    </div>
-    <div id="elevated-list">
-      <div class="el-header">Elevated Days</div>
-      <div id="el-rows"></div>
-    </div>
+    <div id="signal-drivers"></div>
+    <div id="signal-watch"></div>
   </div>
 </div>
 
@@ -533,13 +558,56 @@ function buildStats() {{
   `).join('');
 }}
 
+function buildSummary() {{
+  const elevated = DATA.filter(d => d.signal === 'ELEVATED');
+  const nextElev = elevated[0];
+  const avgSpike = DATA.reduce((s, d) => s + d.spike, 0) / DATA.length;
+  const maxSpike = Math.max(...DATA.map(d => d.spike));
+  const maxSpikeDay = DATA.find(d => d.spike === maxSpike);
+  const peakPrice = Math.max(...DATA.map(d => d.price));
+
+  // Plain English headline
+  let headline, body;
+  if (elevated.length === 0) {{
+    headline = "15-day window looks calm.";
+    body = `Average spike probability is ${{avgSpike.toFixed(0)}}% — below the 50% alert threshold. No elevated risk days detected. Grid is well-supplied with renewables.`;
+  }} else if (elevated.length === 1) {{
+    headline = `One day to watch: ${{fmtDate(nextElev.date)}}.`;
+    body = `${{nextElev.spike.toFixed(0)}}% spike probability driven by low wind and high cloud cover. All other days look manageable. Peak predicted price: $${{peakPrice.toFixed(0)}}/MWh.`;
+  }} else {{
+    headline = `${{elevated.length}} elevated risk days in the window.`;
+    body = `Highest risk: ${{fmtDate(maxSpikeDay.date)}} at ${{maxSpike.toFixed(0)}}% spike probability. Consider hedging exposure on ${{elevated.map(e => fmtDate(e.date)).join(', ')}}.`;
+  }}
+
+  document.getElementById('summary-box').innerHTML = `
+    <div class="sum-headline">${{headline}}</div>
+    <div class="sum-body">${{body}}</div>
+  `;
+
+  // Next alert rows
+  document.getElementById('next-alert-box').innerHTML = `
+    <div class="nal-label">Spike Alerts</div>
+    ${{elevated.length ? elevated.map((f, i) => {{
+      const daysAway = DATA.findIndex(d => d.date === f.date);
+      const bg = f.spike > 55 ? 'rgba(192,57,43,0.07)' : 'rgba(212,132,26,0.07)';
+      const col = f.spike > 55 ? C.elevated : C.warn;
+      return `<div class="alert-row" style="background:${{bg}}" onclick="selectDay(${{DATA.findIndex(d => d.date === f.date)}})">
+        <div>
+          <div class="ar-date" style="color:${{col}}">${{fmtDate(f.date)}}</div>
+          <div class="ar-spike" style="color:var(--text)">${{f.spike.toFixed(0)}}% spike prob</div>
+        </div>
+        <div class="ar-days" style="background:${{col}}22;color:${{col}}">Day ${{daysAway + 1}}</div>
+      </div>`;
+    }}).join('') : '<div style="font-size:11px;color:var(--text);padding:4px 0">No alerts in window ✓</div>'}}
+  `;
+}}
+
 function buildSignal() {{
   const d = DATA[activeDay];
-  const elevated = DATA.filter(x => x.signal === 'ELEVATED');
-  const isElev   = d.signal === 'ELEVATED';
-  const color     = sc(d.signal);
+  const isElev = d.signal === 'ELEVATED';
+  const color  = sc(d.signal);
 
-  document.getElementById('sp-header').textContent = `Signal · ${{fmtDate(d.date)}}`;
+  document.getElementById('sp-day-header').textContent = `${{fmtDate(d.date)}} · Detail`;
 
   const badge = document.getElementById('badge-inner');
   badge.style.background = isElev ? 'rgba(192,57,43,0.08)' : 'rgba(26,122,74,0.08)';
@@ -547,34 +615,56 @@ function buildSignal() {{
   document.getElementById('badge-val').textContent = d.signal;
   document.getElementById('badge-val').style.color = color;
 
-  const metrics = [
-    {{ label: 'Spike Probability', value: `${{d.spike.toFixed(1)}}%`, color: d.spike > 50 ? C.elevated : C.warn }},
-    {{ label: 'Predicted Price',   value: `$${{d.price.toFixed(2)}}`, color: d.price > 100 ? C.elevated : C.accent }},
-    {{ label: 'Grid Tightness',    value: `${{(d.tightness/1000).toFixed(1)}}K MW` }},
-    {{ label: 'Renewables',        value: `${{(d.renewables/1000).toFixed(1)}}K MW`, color: C.accent }},
-    {{ label: 'Wind Speed',        value: `${{d.wind}} mph` }},
-    {{ label: 'Cloud Cover',       value: `${{d.cloud}}%` }},
+  // Key drivers — what's actually causing this
+  const windRisk  = d.wind < 14;
+  const cloudRisk = d.cloud > 45;
+  const heatRisk  = d.temp > 72;
+  const drivers = [
+    {{
+      icon: '💨', label: 'Wind',
+      val: `${{d.wind}} mph — ${{windRisk ? '⚠ below avg, less renewable output' : 'adequate wind generation'}}`,
+      risk: windRisk,
+    }},
+    {{
+      icon: '☁️', label: 'Cloud Cover',
+      val: `${{d.cloud}}% — ${{cloudRisk ? '⚠ heavy cloud, solar suppressed' : 'good solar conditions'}}`,
+      risk: cloudRisk,
+    }},
+    {{
+      icon: '🌡️', label: 'Temperature',
+      val: `${{d.temp}}°F mean — ${{heatRisk ? '⚠ elevated load expected' : 'moderate demand'}}`,
+      risk: heatRisk,
+    }},
+    {{
+      icon: '⚡', label: 'Grid Tightness',
+      val: `${{(d.tightness/1000).toFixed(1)}}K MW gap between demand and supply`,
+      risk: d.tightness > 20500,
+    }},
   ];
-  document.getElementById('signal-metrics').innerHTML = metrics.map(m => `
-    <div class="metric-row">
-      <span class="ml">${{m.label}}</span>
-      <span class="mv" style="color:${{m.color || C.bright}}">${{m.value}}</span>
+
+  document.getElementById('signal-drivers').innerHTML = drivers.map(dr => `
+    <div class="driver-row">
+      <div class="driver-icon" style="background:${{dr.risk ? 'rgba(192,57,43,0.08)' : 'rgba(26,122,74,0.08)'}}">
+        ${{dr.icon}}
+      </div>
+      <div class="driver-text">
+        <div class="driver-label" style="color:${{dr.risk ? C.elevated : C.bright}}">${{dr.label}}</div>
+        <div class="driver-val">${{dr.val}}</div>
+      </div>
     </div>
   `).join('');
 
-  const thesis = isElev
-    ? `<span style="color:${{C.elevated}};font-weight:600">High cloud cover (${{d.cloud}}%)</span> is suppressing solar output. Wind at ${{d.wind}} mph below seasonal average. Tightness at ${{(d.tightness/1000).toFixed(1)}}K MW. <span style="color:${{C.warn}};font-weight:600">Spike probability exceeds 50% threshold.</span> Watch for RTM/DAM divergence.`
-    : `Wind at ${{d.wind}} mph delivering ${{(d.renewables/1000).toFixed(1)}}K MW of renewable output. Grid balanced at ${{(d.tightness/1000).toFixed(1)}}K MW tightness. <span style="color:${{C.accent}};font-weight:600">DAM prices likely to remain subdued</span> barring an unexpected demand shock.`;
-  document.getElementById('thesis-body').innerHTML = thesis;
+  // What to watch
+  const watches = [];
+  if (d.wind < 16) watches.push(`Wind drops below 12 mph — renewable shortfall risk`);
+  if (d.cloud < 50) watches.push(`Cloud cover spikes above 60% — solar output drops`);
+  if (d.temp > 68) watches.push(`Temp exceeds 80°F — cooling load surge`);
+  watches.push(`RTM prices diverging more than 20% above DAM`);
 
-  document.getElementById('el-rows').innerHTML = elevated.length
-    ? elevated.map((f) => `
-        <div class="el-row" onclick="selectDay(${{DATA.findIndex(x => x.date === f.date)}})">
-          <span class="el-date">${{fmtDate(f.date)}}</span>
-          <span class="el-spike">${{f.spike.toFixed(0)}}% spike</span>
-        </div>
-      `).join('')
-    : '<div style="font-size:11px;color:var(--text)">None in window</div>';
+  document.getElementById('signal-watch').innerHTML = `
+    <div class="watch-label">Watch For</div>
+    ${{watches.map(w => `<div class="watch-item">${{w}}</div>`).join('')}}
+  `;
 }}
 
 function selectDay(i) {{
@@ -733,6 +823,7 @@ function renderChart() {{
 buildSidebar();
 buildKPIs();
 buildStats();
+buildSummary();
 buildSignal();
 renderChart();
 </script>
