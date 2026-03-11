@@ -1,0 +1,11 @@
+# Credentials — NEVER commit these
+credentials/
+config.py
+
+# Cache and outputs (keep docs/ for GitHub Pages)
+.cache/
+outputs/
+__pycache__/
+*.pyc
+*.pkl
+.DS_Store

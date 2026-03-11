@@ -688,6 +688,14 @@ renderChart();
     with open(dashboard_path, "w") as f:
         f.write(html)
     print(f"[Dashboard] Saved to {dashboard_path}")
+
+    # Auto-publish to docs/ for GitHub Pages
+    import shutil
+    docs_dir = Path(__file__).parent / "docs"
+    docs_dir.mkdir(exist_ok=True)
+    shutil.copy(dashboard_path, docs_dir / "index.html")
+    print(f"[Dashboard] Published to docs/index.html")
+
     print(f"[Dashboard] Opening in browser...")
     webbrowser.open(f"file://{dashboard_path.absolute()}")
 
