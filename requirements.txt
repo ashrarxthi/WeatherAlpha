@@ -1,0 +1,19 @@
+# WeatherAlpha — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Google Cloud
+google-cloud-bigquery==3.20.0
+google-auth==2.29.0
+db-dtypes==1.2.0          # required for BigQuery → pandas
+
+# Data & ML
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.0
+
+# HTTP
+requests==2.32.2
+urllib3==2.2.1
+
+# Anthropic
+anthropic==0.28.0

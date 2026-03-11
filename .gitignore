@@ -1,0 +1,11 @@
+# Credentials — NEVER commit these
+credentials/
+config.py
+
+# Cache and outputs
+.cache/
+outputs/
+__pycache__/
+*.pyc
+*.pkl
+.DS_Store

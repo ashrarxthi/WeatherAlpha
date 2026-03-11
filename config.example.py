@@ -1,0 +1,12 @@
+GCP_PROJECT_ID         = "your-gcp-project-id"
+GOOGLE_CREDENTIALS_PATH = "./credentials/google_service_account.json"
+ERCOT_USERNAME         = "your-ercot-email@example.com"
+ERCOT_PASSWORD         = "your-ercot-password"
+ERCOT_SUBSCRIPTION     = "your-subscription-key"
+ANTHROPIC_API_KEY      = "sk-ant-..."
+CLAUDE_MODEL           = "claude-sonnet-4-20250514"
+WEATHERNEXT_TABLE      = "your-project.weathernext_2.weathernext_2_0_0"
+CALIBRATION_DAYS       = 730
+DEFAULT_ZONE           = "HB_BUSAVG"
+FORECAST_DAYS          = 15
+SPIKE_MULTIPLIER       = 2.0
