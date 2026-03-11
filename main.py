@@ -320,34 +320,58 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
   /* CONTENT */
   #content {{ flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }}
 
-  /* KPI ROW */
-  #kpis {{ display: flex; gap: 12px; padding: 12px 16px; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--panel); }}
-  .kpi {{ background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; flex: 1; }}
-  .kpi .klabel {{ font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text); margin-bottom: 6px; }}
-  .kpi .kvalue {{ font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--bright); }}
-  .kpi .ksub {{ font-size: 10px; color: var(--text); margin-top: 3px; }}
+  /* SPARKLINE STRIP */
+  #sparkline-strip {{ flex-shrink: 0; background: var(--panel); border-bottom: 1px solid var(--border); padding: 12px 20px 10px; }}
+  #sparkline-strip .strip-label {{ font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text); margin-bottom: 8px; display: flex; justify-content: space-between; }}
+  #sparkline-wrap {{ position: relative; height: 90px; width: 100%; }}
+  #sparkline-wrap canvas {{ position: absolute; top: 0; left: 0; cursor: pointer; }}
 
-  /* STATS ROW */
-  #stats {{ display: flex; gap: 0; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--panel); }}
-  .stat {{ padding: 10px 16px; flex: 1; border-right: 1px solid var(--border); }}
-  .stat:last-child {{ border-right: none; }}
-  .stat .slabel {{ font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }}
-  .stat .svalue {{ font-size: 13px; font-weight: 600; color: var(--bright); font-family: 'DM Mono', monospace; }}
+  /* DAY DETAIL */
+  #day-detail {{ flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }}
 
-  /* TABS */
-  #tabs {{ display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--panel); padding: 0 16px; }}
-  .tab {{ padding: 10px 14px; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text); border-bottom: 2px solid transparent; transition: all 0.15s; font-family: 'Inter', sans-serif; background: none; border-top: none; border-left: none; border-right: none; margin-right: 4px; }}
-  .tab:hover {{ color: var(--accent); }}
-  .tab.active {{ color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }}
+  /* Detail header */
+  .detail-header {{ display: flex; align-items: center; justify-content: space-between; }}
+  .detail-date {{ font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--bright); }}
+  .detail-signal {{ padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }}
 
-  /* CHART AREA */
-  #chart-area {{ flex: 1; padding: 16px 20px; overflow: hidden; display: flex; flex-direction: column; }}
-  #chart-area .chart-title {{ font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 12px; letter-spacing: 0.02em; }}
-  .chart-wrap {{ flex: 1; position: relative; min-height: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }}
-  .chart-wrap canvas {{ max-height: 100% !important; }}
+  /* Big price card */
+  .price-card {{ background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; display: flex; gap: 0; }}
+  .pc-main {{ flex: 1; }}
+  .pc-label {{ font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text); margin-bottom: 6px; }}
+  .pc-price {{ font-size: 36px; font-weight: 700; letter-spacing: -1px; }}
+  .pc-sub {{ font-size: 11px; color: var(--text); margin-top: 4px; }}
+  .pc-divider {{ width: 1px; background: var(--border); margin: 0 20px; }}
+  .pc-spike {{ text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; }}
+  .pc-spike-val {{ font-size: 28px; font-weight: 700; }}
+  .pc-spike-label {{ font-size: 10px; color: var(--text); margin-top: 4px; font-weight: 500; }}
+
+  /* Spike bar */
+  .spike-bar-wrap {{ background: var(--border); border-radius: 4px; height: 6px; margin-top: 10px; overflow: hidden; width: 100%; }}
+  .spike-bar-fill {{ height: 100%; border-radius: 4px; transition: width 0.4s; }}
+
+  /* Driver grid */
+  .driver-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }}
+  .driver-card {{ background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }}
+  .driver-card.risk {{ border-color: rgba(192,57,43,0.3); background: rgba(192,57,43,0.03); }}
+  .driver-card.ok {{ border-color: rgba(26,122,74,0.2); background: rgba(26,122,74,0.02); }}
+  .dc-top {{ display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }}
+  .dc-icon {{ font-size: 15px; }}
+  .dc-label {{ font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }}
+  .dc-value {{ font-size: 18px; font-weight: 700; font-family: 'DM Mono', monospace; }}
+  .dc-sub {{ font-size: 10px; margin-top: 3px; }}
+
+  /* Action box */
+  .action-box {{ background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; }}
+  .action-box.risk {{ border-color: rgba(192,57,43,0.3); background: rgba(192,57,43,0.03); }}
+  .action-box.ok {{ border-color: rgba(26,122,74,0.2); background: rgba(26,122,74,0.02); }}
+  .ab-title {{ font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }}
+  .ab-body {{ font-size: 12px; line-height: 1.7; color: var(--text2); }}
+  .ab-watches {{ margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }}
+  .ab-watch {{ font-size: 11px; color: var(--text2); padding-left: 14px; position: relative; }}
+  .ab-watch::before {{ content: "→"; position: absolute; left: 0; font-weight: 700; }}
 
   /* RIGHT PANEL */
-  #signal-panel {{ width: 220px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }}
+  #signal-panel {{ width: 260px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }}
   #signal-panel .sp-header {{ padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }}
   #signal-badge {{ padding: 16px; border-bottom: 1px solid var(--border); }}
   #signal-badge .badge-inner {{ border-radius: 8px; padding: 14px; text-align: center; }}
@@ -423,20 +447,14 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
 
   <!-- CONTENT -->
   <div id="content">
-    <div id="kpis"></div>
-    <div id="stats"></div>
-    <div id="tabs">
-      <button class="tab active" onclick="switchTab('price', this)">Price Forecast</button>
-      <button class="tab" onclick="switchTab('spike', this)">Spike Probability</button>
-      <button class="tab" onclick="switchTab('supply', this)">Supply / Demand</button>
-      <button class="tab" onclick="switchTab('weather', this)">Weather Signals</button>
-    </div>
-    <div id="chart-area">
-      <div class="chart-title" id="chart-title"></div>
-      <div class="chart-wrap">
-        <canvas id="main-chart"></canvas>
+    <div id="sparkline-strip">
+      <div class="strip-label">
+        <span>15-Day Price Forecast — click any day</span>
+        <span id="strip-range" style="font-weight:400;color:var(--text)"></span>
       </div>
+      <div id="sparkline-wrap"><canvas id="sparkline-chart"></canvas></div>
     </div>
+    <div id="day-detail"></div>
   </div>
 
   <!-- SIGNAL PANEL -->
@@ -508,54 +526,135 @@ function buildSidebar() {{
   `).join('');
 }}
 
-function buildKPIs() {{
-  const peakPrice = Math.max(...DATA.map(d => d.price));
-  const peakDay   = DATA.find(d => d.price === peakPrice);
-  const avgSpike  = (DATA.reduce((s, d) => s + d.spike, 0) / DATA.length).toFixed(1);
-  const elevated  = DATA.filter(d => d.signal === 'ELEVATED');
-  const d         = DATA[activeDay];
+function renderSparkline() {{
+  const existing = Chart.getChart('sparkline-chart');
+  if (existing) existing.destroy();
 
-  document.getElementById('kpis').innerHTML = `
-    <div class="kpi">
-      <div class="klabel">Peak Forecast Price</div>
-      <div class="kvalue" style="color:${{C.elevated}}">$${{peakPrice.toFixed(0)}}<span style="font-size:13px;font-weight:500">/MWh</span></div>
-      <div class="ksub">${{fmtDate(peakDay.date)}} · highest in 15-day window</div>
-    </div>
-    <div class="kpi">
-      <div class="klabel">Avg Spike Probability</div>
-      <div class="kvalue" style="color:${{C.warn}}">${{avgSpike}}<span style="font-size:13px;font-weight:500">%</span></div>
-      <div class="ksub">across all 15 forecast days</div>
-    </div>
-    <div class="kpi">
-      <div class="klabel">Elevated Risk Days</div>
-      <div class="kvalue" style="color:${{C.elevated}}">${{elevated.length}}</div>
-      <div class="ksub">${{elevated.map(x => fmtDate(x.date)).join(' · ')}}</div>
-    </div>
-    <div class="kpi">
-      <div class="klabel">Selected · Signal</div>
-      <div class="kvalue" style="color:${{sc(d.signal)}};font-size:16px">${{d.signal}}</div>
-      <div class="ksub">${{d.spike.toFixed(1)}}% spike · $${{d.price.toFixed(0)}}/MWh predicted</div>
-    </div>
-  `;
+  const prices = DATA.map(d => d.price);
+  const minP = Math.min(...prices), maxP = Math.max(...prices);
+  document.getElementById('strip-range').textContent =
+    `$${{minP.toFixed(0)}} – $${{maxP.toFixed(0)}}/MWh`;
+
+  const ctx = document.getElementById('sparkline-chart').getContext('2d');
+  new Chart(ctx, {{
+    type: 'bar',
+    data: {{
+      labels: DATA.map(d => fmtDate(d.date)),
+      datasets: [{{
+        data: prices,
+        backgroundColor: DATA.map((d, i) => {{
+          if (i === activeDay) return d.signal === 'ELEVATED' ? C.elevated : C.accent;
+          return d.signal === 'ELEVATED' ? C.elevated + '99' : C.accent + '66';
+        }}),
+        borderRadius: 3,
+        borderSkipped: false,
+        barPercentage: 0.7,
+        categoryPercentage: 0.85,
+      }}],
+    }},
+    options: {{
+      responsive: true,
+      maintainAspectRatio: false,
+      onClick: (e, els) => {{ if (els.length) selectDay(els[0].index); }},
+      plugins: {{ legend: {{ display: false }}, tooltip: {{
+        callbacks: {{ label: c => `$${{c.parsed.y.toFixed(0)}}/MWh` }},
+        backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text,
+        borderColor: '#e4ebe4', borderWidth: 1,
+      }} }},
+      scales: {{
+        x: {{ grid: {{ display: false }}, ticks: {{ color: C.text, font: {{ family: 'Inter', size: 9 }}, maxRotation: 0 }}, border: {{ display: false }} }},
+        y: {{ display: false, min: Math.max(0, minP * 0.85) }},
+      }},
+    }},
+  }});
 }}
 
-function buildStats() {{
+function renderDayDetail() {{
   const d = DATA[activeDay];
-  const stats = [
-    {{ label: 'Pred Price', value: `$${{d.price.toFixed(2)}}/MWh`, color: d.price > 100 ? C.elevated : C.accent }},
-    {{ label: 'Demand', value: `${{(d.demand/1000).toFixed(1)}}K MW` }},
-    {{ label: 'Renewables', value: `${{(d.renewables/1000).toFixed(1)}}K MW`, color: C.accent }},
-    {{ label: 'Grid Tightness', value: `${{(d.tightness/1000).toFixed(1)}}K MW` }},
-    {{ label: 'Wind Speed', value: `${{d.wind}} mph` }},
-    {{ label: 'Cloud Cover', value: `${{d.cloud}}%` }},
-    {{ label: 'Temp (Mean / Max)', value: `${{d.temp}}° / ${{d.tempMax}}°F` }},
-  ];
-  document.getElementById('stats').innerHTML = stats.map(s => `
-    <div class="stat">
-      <div class="slabel">${{s.label}}</div>
-      <div class="svalue" style="color:${{s.color || C.bright}}">${{s.value}}</div>
+  const isElev = d.signal === 'ELEVATED';
+  const col = sc(d.signal);
+
+  const windOk  = d.wind >= 14;
+  const cloudOk = d.cloud <= 45;
+  const tempOk  = d.temp <= 72;
+  const tightOk = d.tightness <= 20500;
+
+  const actionText = isElev
+    ? `Spike probability is <strong style="color:${{C.elevated}}">${{d.spike.toFixed(0)}}%</strong> — above the 50% threshold. Low wind and high cloud cover are squeezing renewables while demand stays elevated. Consider locking in forward contracts or reducing spot exposure on this day.`
+    : `Grid looks well-supplied. Wind is delivering ${{(d.renewables/1000).toFixed(1)}}K MW of renewable capacity. DAM prices should remain subdued unless an unexpected demand event occurs.`;
+
+  const watches = [];
+  if (!windOk || d.wind < 16) watches.push(`Wind drops below 12 mph (currently ${{d.wind}} mph)`);
+  if (!cloudOk || d.cloud > 40) watches.push(`Cloud cover spikes above 60% (currently ${{d.cloud}}%)`);
+  if (!tempOk || d.temp > 68) watches.push(`Temp exceeds 85°F — cooling demand surge (currently ${{d.temp}}°F)`);
+  watches.push(`RTM diverges more than 20% above DAM settlement`);
+
+  document.getElementById('day-detail').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-date">${{new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', {{ weekday:'long', month:'long', day:'numeric' }})}}</div>
+      <div class="detail-signal" style="background:${{col}}18;color:${{col}};border:1px solid ${{col}}44">${{d.signal}}</div>
     </div>
-  `).join('');
+
+    <div class="price-card">
+      <div class="pc-main">
+        <div class="pc-label">Predicted DAM Price</div>
+        <div class="pc-price" style="color:${{d.price > 100 ? C.elevated : C.accent}}">${{d.price > 100 ? '' : ''}}$${{d.price.toFixed(0)}}<span style="font-size:16px;font-weight:500">/MWh</span></div>
+        <div class="pc-sub">Grid tightness: ${{(d.tightness/1000).toFixed(1)}}K MW · Renewables: ${{(d.renewables/1000).toFixed(1)}}K MW</div>
+      </div>
+      <div class="pc-divider"></div>
+      <div class="pc-spike">
+        <div class="pc-spike-val" style="color:${{d.spike > 50 ? C.elevated : d.spike > 40 ? C.warn : C.accent}}">${{d.spike.toFixed(0)}}%</div>
+        <div class="pc-spike-label">Spike Prob</div>
+        <div class="spike-bar-wrap" style="width:70px;margin-top:8px">
+          <div class="spike-bar-fill" style="width:${{d.spike}}%;background:${{d.spike > 50 ? C.elevated : d.spike > 40 ? C.warn : C.accent}}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="driver-grid">
+      <div class="driver-card ${{windOk ? 'ok' : 'risk'}}">
+        <div class="dc-top">
+          <span class="dc-icon">💨</span>
+          <span class="dc-label" style="color:${{windOk ? C.accent : C.elevated}}">Wind</span>
+        </div>
+        <div class="dc-value" style="color:${{windOk ? C.bright : C.elevated}}">${{d.wind}} <span style="font-size:13px">mph</span></div>
+        <div class="dc-sub" style="color:${{windOk ? C.text : C.elevated}}">${{windOk ? '✓ adequate generation' : '⚠ below avg — less solar'}}</div>
+      </div>
+      <div class="driver-card ${{cloudOk ? 'ok' : 'risk'}}">
+        <div class="dc-top">
+          <span class="dc-icon">☁️</span>
+          <span class="dc-label" style="color:${{cloudOk ? C.accent : C.elevated}}">Cloud Cover</span>
+        </div>
+        <div class="dc-value" style="color:${{cloudOk ? C.bright : C.elevated}}">${{d.cloud}}<span style="font-size:13px">%</span></div>
+        <div class="dc-sub" style="color:${{cloudOk ? C.text : C.elevated}}">${{cloudOk ? '✓ solar unimpeded' : '⚠ solar suppressed'}}</div>
+      </div>
+      <div class="driver-card ${{tempOk ? 'ok' : 'risk'}}">
+        <div class="dc-top">
+          <span class="dc-icon">🌡️</span>
+          <span class="dc-label" style="color:${{tempOk ? C.accent : C.elevated}}">Temperature</span>
+        </div>
+        <div class="dc-value" style="color:${{tempOk ? C.bright : C.elevated}}">${{d.temp}}°<span style="font-size:13px">F</span></div>
+        <div class="dc-sub" style="color:${{tempOk ? C.text : C.elevated}}">${{tempOk ? '✓ moderate demand' : '⚠ elevated cooling load'}}</div>
+      </div>
+      <div class="driver-card ${{tightOk ? 'ok' : 'risk'}}">
+        <div class="dc-top">
+          <span class="dc-icon">⚡</span>
+          <span class="dc-label" style="color:${{tightOk ? C.accent : C.elevated}}">Grid Tightness</span>
+        </div>
+        <div class="dc-value" style="color:${{tightOk ? C.bright : C.elevated}}">${{(d.tightness/1000).toFixed(1)}}<span style="font-size:13px">K MW</span></div>
+        <div class="dc-sub" style="color:${{tightOk ? C.text : C.elevated}}">${{tightOk ? '✓ grid balanced' : '⚠ tight supply margin'}}</div>
+      </div>
+    </div>
+
+    <div class="action-box ${{isElev ? 'risk' : 'ok'}}">
+      <div class="ab-title" style="color:${{col}}">${{isElev ? '⚠ Action Recommended' : '✓ No Action Needed'}}</div>
+      <div class="ab-body">${{actionText}}</div>
+      <div class="ab-watches">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text);margin-top:6px;margin-bottom:2px">Watch For</div>
+        ${{watches.map(w => `<div class="ab-watch" style="--col:${{C.warn}}">${{w}}</div>`).join('')}}
+      </div>
+    </div>
+  `;
 }}
 
 function buildSummary() {{
@@ -671,161 +770,16 @@ function selectDay(i) {{
   document.querySelectorAll('.day-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`day-${{i}}`).classList.add('active');
   activeDay = i;
-  buildKPIs();
-  buildStats();
   buildSignal();
-  renderChart();
-}}
-
-function switchTab(tab, btn) {{
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  activeTab = tab;
-  renderChart();
-}}
-
-function renderChart() {{
-  const titles = {{
-    price:   'DAM Settlement Point Price Forecast  ·  $/MWh  ·  {zone}',
-    spike:   'Spike Probability  ·  %  ·  Logistic Regression on Grid Tightness',
-    supply:  'Demand vs Renewables vs Grid Tightness  ·  MW',
-    weather: 'Temperature · Wind · Cloud Cover  ·  15-Day Weather Signals',
-  }};
-  document.getElementById('chart-title').textContent = titles[activeTab];
-
-  if (chart) {{ chart.destroy(); chart = null; }}
-  const ctx = document.getElementById('main-chart').getContext('2d');
-  const labels = DATA.map(d => fmtDate(d.date));
-
-  const gridOpts = {{ color: C.grid, drawBorder: false }};
-  const tickOpts = {{ color: C.text, font: {{ family: 'Inter', size: 10 }} }};
-
-  Chart.defaults.font.family = 'Inter';
-
-  if (activeTab === 'price') {{
-    chart = new Chart(ctx, {{
-      type: 'line',
-      data: {{
-        labels,
-        datasets: [{{
-          label: 'Predicted Price',
-          data: DATA.map(d => d.price),
-          borderColor: C.accent,
-          borderWidth: 2.5,
-          backgroundColor: C.accentA,
-          fill: true,
-          tension: 0.35,
-          pointRadius: DATA.map((d, i) => i === activeDay ? 7 : d.signal === 'ELEVATED' ? 6 : 4),
-          pointBackgroundColor: DATA.map(d => d.signal === 'ELEVATED' ? C.elevated : C.accent),
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-        }}],
-      }},
-      options: {{
-        responsive: true, maintainAspectRatio: false,
-        onClick: (e, els) => {{ if (els.length) selectDay(els[0].index); }},
-        plugins: {{
-          legend: {{ display: false }},
-          tooltip: {{ callbacks: {{ label: ctx => `$${{ctx.parsed.y.toFixed(2)}}/MWh` }}, backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 }},
-        }},
-        scales: {{
-          x: {{ grid: gridOpts, ticks: tickOpts, border: {{ color: '#e4ebe4' }} }},
-          y: {{ grid: gridOpts, ticks: {{ ...tickOpts, callback: v => `$${{v}}` }}, border: {{ display: false }} }},
-        }},
-      }},
-    }});
-  }}
-
-  else if (activeTab === 'spike') {{
-    chart = new Chart(ctx, {{
-      type: 'bar',
-      data: {{
-        labels,
-        datasets: [{{
-          label: 'Spike Probability',
-          data: DATA.map(d => d.spike),
-          backgroundColor: DATA.map((d, i) => {{
-            const base = d.spike > 50 ? C.elevated : d.spike > 45 ? C.warn : C.accent;
-            return i === activeDay ? base : base + 'bb';
-          }}),
-          borderRadius: 4,
-          borderSkipped: false,
-        }}],
-      }},
-      options: {{
-        responsive: true, maintainAspectRatio: false,
-        onClick: (e, els) => {{ if (els.length) selectDay(els[0].index); }},
-        plugins: {{
-          legend: {{ display: false }},
-          tooltip: {{ callbacks: {{ label: ctx => `${{ctx.parsed.y.toFixed(1)}}%` }}, backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 }},
-        }},
-        scales: {{
-          x: {{ grid: gridOpts, ticks: tickOpts, border: {{ color: '#e4ebe4' }} }},
-          y: {{ min: 0, max: 100, grid: gridOpts, ticks: {{ ...tickOpts, callback: v => `${{v}}%` }}, border: {{ display: false }} }},
-        }},
-      }},
-    }});
-  }}
-
-  else if (activeTab === 'supply') {{
-    chart = new Chart(ctx, {{
-      type: 'line',
-      data: {{
-        labels,
-        datasets: [
-          {{ label: 'Demand', data: DATA.map(d => d.demand), borderColor: C.warn, borderWidth: 2, backgroundColor: C.warnA, fill: true, tension: 0.3, pointRadius: 0 }},
-          {{ label: 'Renewables', data: DATA.map(d => d.renewables), borderColor: C.accent, borderWidth: 2, backgroundColor: C.accentA, fill: true, tension: 0.3, pointRadius: 0 }},
-          {{ label: 'Tightness', data: DATA.map(d => d.tightness), borderColor: C.elevated, borderWidth: 2, borderDash: [5, 3], backgroundColor: 'transparent', tension: 0.3, pointRadius: 0 }},
-        ],
-      }},
-      options: {{
-        responsive: true, maintainAspectRatio: false,
-        plugins: {{
-          legend: {{ labels: {{ color: C.text, font: {{ family: 'Inter', size: 10 }}, boxWidth: 10, padding: 16 }} }},
-          tooltip: {{ callbacks: {{ label: ctx => `${{(ctx.parsed.y/1000).toFixed(1)}}K MW` }}, backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 }},
-        }},
-        scales: {{
-          x: {{ grid: gridOpts, ticks: tickOpts, border: {{ color: '#e4ebe4' }} }},
-          y: {{ grid: gridOpts, ticks: {{ ...tickOpts, callback: v => `${{(v/1000).toFixed(0)}}K` }}, border: {{ display: false }} }},
-        }},
-      }},
-    }});
-  }}
-
-  else if (activeTab === 'weather') {{
-    chart = new Chart(ctx, {{
-      type: 'line',
-      data: {{
-        labels,
-        datasets: [
-          {{ label: 'Temp Max °F', data: DATA.map(d => d.tempMax), borderColor: C.elevated, borderWidth: 1.5, backgroundColor: C.elevatedA, fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'temp' }},
-          {{ label: 'Temp Mean °F', data: DATA.map(d => d.temp), borderColor: C.warn, borderWidth: 2, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, yAxisID: 'temp' }},
-          {{ label: 'Wind mph', data: DATA.map(d => d.wind), borderColor: C.accent, borderWidth: 2, backgroundColor: 'transparent', tension: 0.3, pointRadius: 0, yAxisID: 'wind' }},
-          {{ label: 'Cloud %', data: DATA.map(d => d.cloud), borderColor: '#aab5aa', borderWidth: 1, backgroundColor: 'rgba(170,181,170,0.12)', fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'wind' }},
-        ],
-      }},
-      options: {{
-        responsive: true, maintainAspectRatio: false,
-        plugins: {{
-          legend: {{ labels: {{ color: C.text, font: {{ family: 'Inter', size: 10 }}, boxWidth: 10, padding: 16 }} }},
-          tooltip: {{ backgroundColor: '#fff', titleColor: C.bright, bodyColor: C.text, borderColor: '#e4ebe4', borderWidth: 1 }},
-        }},
-        scales: {{
-          x: {{ grid: gridOpts, ticks: tickOpts, border: {{ color: '#e4ebe4' }} }},
-          temp: {{ type: 'linear', position: 'left', grid: gridOpts, ticks: {{ ...tickOpts, callback: v => `${{v}}°` }}, border: {{ display: false }} }},
-          wind: {{ type: 'linear', position: 'right', grid: {{ display: false }}, ticks: {{ ...tickOpts, callback: v => `${{v}}` }}, border: {{ display: false }} }},
-        }},
-      }},
-    }});
-  }}
+  renderSparkline();
+  renderDayDetail();
 }}
 
 buildSidebar();
-buildKPIs();
-buildStats();
 buildSummary();
 buildSignal();
-renderChart();
+renderSparkline();
+renderDayDetail();
 </script>
 </body>
 </html>"""
