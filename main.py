@@ -290,6 +290,15 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
   /* TOP BAR */
   #topbar {{ background: var(--panel); border-bottom: 1px solid var(--border); height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }}
   #topbar .logo {{ display: flex; align-items: center; gap: 12px; }}
+  #topbar .map-wrap {{ position: relative; display: flex; align-items: center; cursor: default; }}
+  #topbar .map-wrap:hover .map-tooltip {{ opacity: 1; pointer-events: auto; }}
+  .map-tooltip {{ position: absolute; top: 38px; left: 50%; transform: translateX(-50%); background: white; border: 1px solid var(--border2); border-radius: 8px; padding: 10px 14px; width: 220px; box-shadow: 0 4px 16px rgba(0,0,0,0.10); opacity: 0; pointer-events: none; transition: opacity 0.15s; z-index: 100; }}
+  .map-tooltip::before {{ content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; background: white; border-left: 1px solid var(--border2); border-top: 1px solid var(--border2); transform: translateX(-50%) rotate(45deg); }}
+  .map-tooltip .mt-title {{ font-size: 11px; font-weight: 700; color: var(--bright); margin-bottom: 4px; }}
+  .map-tooltip .mt-body {{ font-size: 10px; color: var(--text); line-height: 1.6; }}
+  .map-tooltip .mt-stat {{ display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }}
+  .map-tooltip .mt-stat span {{ font-size: 10px; color: var(--text); }}
+  .map-tooltip .mt-stat strong {{ font-size: 10px; color: var(--bright); font-weight: 600; }}
   #topbar .brand-wrap {{ display: flex; align-items: center; gap: 8px; }}
   #topbar .brand-icon {{ width: 28px; height: 28px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px; letter-spacing: -0.5px; }}
   #topbar .brand {{ color: var(--bright); font-weight: 700; font-size: 15px; letter-spacing: -0.3px; }}
@@ -430,7 +439,34 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
       <span class="brand">WeatherAlpha</span>
     </div>
     <div class="divider"></div>
-    <span class="sub">ERCOT · {zone} · 15-Day Price Intelligence</span>
+    <div class="map-wrap">
+      <!-- Simplified Texas SVG outline with ERCOT shaded -->
+      <svg width="44" height="36" viewBox="0 0 44 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
+        <!-- Texas state outline (simplified) -->
+        <path d="M4,2 L38,2 L40,4 L40,10 L38,10 L38,14 L36,16 L36,20 L32,24 L28,28 L24,32 L20,34 L16,32 L10,28 L6,22 L4,18 L2,14 L2,6 Z"
+              fill="rgba(26,122,74,0.15)" stroke="#1a7a4a" stroke-width="1.2"/>
+        <!-- ERCOT coverage label -->
+        <text x="21" y="16" text-anchor="middle" font-size="5.5" font-family="Inter,sans-serif" font-weight="700" fill="#1a7a4a">ERCOT</text>
+        <text x="21" y="22" text-anchor="middle" font-size="4" font-family="Inter,sans-serif" fill="#6b7c6b">~90% of Texas</text>
+        <!-- Small star for Austin (ERCOT HQ) -->
+        <circle cx="22" cy="26" r="1.5" fill="#1a7a4a"/>
+      </svg>
+      <div class="map-tooltip">
+        <div class="mt-title">ERCOT Coverage Area</div>
+        <div class="mt-body">The Electric Reliability Council of Texas manages the flow of electric power to about 90% of the state — roughly 26 million customers across most of Texas.</div>
+        <div class="mt-stat">
+          <span>Grid capacity</span><strong>~90 GW</strong>
+        </div>
+        <div class="mt-stat">
+          <span>Customers</span><strong>~26M</strong>
+        </div>
+        <div class="mt-stat">
+          <span>Monitoring zone</span><strong>{zone}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <span class="sub">Texas Grid (ERCOT) · {zone} · 15-Day Price Intelligence</span>
   </div>
   <div class="meta">
     <span class="badge badge-warn">⚠ Synthetic Proxy · WeatherNext Pending</span>
