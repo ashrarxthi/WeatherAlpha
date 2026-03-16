@@ -285,7 +285,8 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
     --sidebar: #f2f7f2;
   }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-  body {{ background: var(--bg); color: var(--bright); font-family: 'Inter', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }}
+  body {{ background: var(--bg); color: var(--bright); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; font-size: 13px; }}
+  #app-shell {{ flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }}
 
   /* TOP BAR */
   #topbar {{ background: var(--panel); border-bottom: 1px solid var(--border); height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }}
@@ -425,6 +426,30 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
   #signal-watch .watch-item {{ font-size: 11px; color: var(--text2); line-height: 1.7; padding-left: 12px; position: relative; margin-bottom: 4px; }}
   #signal-watch .watch-item::before {{ content: "→"; position: absolute; left: 0; color: var(--warn); font-weight: 600; }}
 
+  /* HERO */
+  #hero {{ background: var(--panel); border-bottom: 2px solid var(--border); padding: 36px 48px 32px; flex-shrink: 0; }}
+  #hero .hero-eyebrow {{ font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }}
+  #hero .hero-eyebrow::before {{ content: ''; width: 20px; height: 2px; background: var(--accent); border-radius: 1px; display: inline-block; }}
+  #hero .hero-headline {{ font-size: 28px; font-weight: 800; letter-spacing: -0.8px; color: var(--bright); line-height: 1.2; margin-bottom: 12px; max-width: 640px; }}
+  #hero .hero-headline span {{ color: var(--accent); }}
+  #hero .hero-sub {{ font-size: 14px; color: var(--text); line-height: 1.7; max-width: 560px; margin-bottom: 24px; }}
+  #hero .hero-stats {{ display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }}
+  .hero-stat {{ background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 11px 18px; display: flex; align-items: center; gap: 10px; }}
+  .hero-stat .hs-val {{ font-size: 18px; font-weight: 800; letter-spacing: -0.5px; color: var(--bright); }}
+  .hero-stat .hs-label {{ font-size: 11px; color: var(--text); line-height: 1.4; max-width: 110px; }}
+  .hero-stat.warn .hs-val {{ color: var(--elevated); }}
+  .hero-stat.green .hs-val {{ color: var(--accent); }}
+  #hero .hero-how {{ display: flex; gap: 8px; align-items: flex-start; }}
+  .how-step {{ background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; flex: 1; }}
+  .how-step .hs-num {{ font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 3px; }}
+  .how-step .hs-title {{ font-size: 11px; font-weight: 700; color: var(--bright); margin-bottom: 2px; }}
+  .how-step .hs-desc {{ font-size: 10px; color: var(--text); line-height: 1.5; }}
+  .how-arrow {{ color: var(--border2); font-size: 16px; padding-top: 14px; flex-shrink: 0; }}
+  #hero .hero-cta {{ margin-top: 18px; display: flex; align-items: center; gap: 12px; }}
+  .cta-btn {{ background: var(--accent); color: white; border: none; border-radius: 7px; padding: 9px 20px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; letter-spacing: 0.02em; }}
+  .cta-btn:hover {{ opacity: 0.88; }}
+  .cta-note {{ font-size: 11px; color: var(--text); }}
+
   /* Scrollbar */
   ::-webkit-scrollbar {{ width: 4px; }}
   ::-webkit-scrollbar-track {{ background: transparent; }}
@@ -432,6 +457,66 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
 </style>
 </head>
 <body>
+
+<!-- HERO (landing page) -->
+<div id="hero">
+  <div class="hero-eyebrow">Energy Price Intelligence · Texas Grid</div>
+  <div class="hero-headline">Know when electricity prices will <span>spike</span> — 15 days out.</div>
+  <div class="hero-sub">WeatherAlpha maps DeepMind weather forecasts directly to ERCOT price risk. Energy traders, industrial buyers, and grid operators use signals like this to hedge exposure before it's too late.</div>
+
+  <div class="hero-stats">
+    <div class="hero-stat warn">
+      <div class="hs-val">$5,000+</div>
+      <div class="hs-label">per MWh during Texas grid emergencies</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val">26M</div>
+      <div class="hs-label">customers on the ERCOT grid</div>
+    </div>
+    <div class="hero-stat green">
+      <div class="hs-val">15-day</div>
+      <div class="hs-label">forecast horizon — where the alpha lives</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hs-val">DeepMind</div>
+      <div class="hs-label">WeatherNext 2 — beats ECMWF past day 5</div>
+    </div>
+  </div>
+
+  <div class="hero-how">
+    <div class="how-step">
+      <div class="hs-num">01 · WEATHER</div>
+      <div class="hs-title">DeepMind Forecast</div>
+      <div class="hs-desc">WeatherNext 2 ensemble — wind, temperature, cloud cover, 15 days ahead</div>
+    </div>
+    <div class="how-arrow">→</div>
+    <div class="how-step">
+      <div class="hs-num">02 · GRID</div>
+      <div class="hs-title">ERCOT Price History</div>
+      <div class="hs-desc">2 years of DAM &amp; RTM settlement data pulled live from ERCOT's API</div>
+    </div>
+    <div class="how-arrow">→</div>
+    <div class="how-step">
+      <div class="hs-num">03 · MODEL</div>
+      <div class="hs-title">Spike Probability</div>
+      <div class="hs-desc">Calibrated logistic regression maps weather → grid tightness → price risk</div>
+    </div>
+    <div class="how-arrow">→</div>
+    <div class="how-step">
+      <div class="hs-num">04 · SIGNAL</div>
+      <div class="hs-title">Actionable Output</div>
+      <div class="hs-desc">Plain-English daily signal — hedge, hold, or watch — with key drivers explained</div>
+    </div>
+  </div>
+
+  <div class="hero-cta">
+    <button class="cta-btn" onclick="document.getElementById('app-shell').scrollIntoView({{behavior:'smooth'}})">↓ View Live Dashboard</button>
+    <span class="cta-note">Updated daily · ERCOT HB_BUSAVG hub · Texas</span>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app-shell">
 
 <!-- TOP BAR -->
 <div id="topbar">
@@ -824,6 +909,7 @@ buildSignal();
 renderSparkline();
 renderDayDetail();
 </script>
+</div><!-- /app-shell -->
 </body>
 </html>"""
 
