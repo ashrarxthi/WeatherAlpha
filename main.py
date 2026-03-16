@@ -460,58 +460,75 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
 
 <!-- HERO (landing page) -->
 <div id="hero">
-  <div class="hero-eyebrow">Energy Price Intelligence · Texas Grid</div>
-  <div class="hero-headline">Know when electricity prices will <span>spike</span> — 15 days out.</div>
-  <div class="hero-sub">WeatherAlpha maps DeepMind weather forecasts directly to ERCOT price risk. Energy traders, industrial buyers, and grid operators use signals like this to hedge exposure before it's too late.</div>
+  <div class="hero-eyebrow">For Texas manufacturers, data centers &amp; industrial buyers</div>
+  <div class="hero-headline">Stop getting <span>blindsided</span> by your electricity bill.</div>
+  <div class="hero-sub">If your facility runs on the Texas grid, a single bad week can add hundreds of thousands of dollars to your energy costs. WeatherAlpha tells you 15 days in advance when prices are about to spike — so you can lock in a forward contract before it happens, not after.</div>
 
   <div class="hero-stats">
     <div class="hero-stat warn">
-      <div class="hs-val">$5,000+</div>
-      <div class="hs-label">per MWh during Texas grid emergencies</div>
+      <div class="hs-val">$5,000</div>
+      <div class="hs-label">per MWh — what spot prices hit during the 2021 Texas freeze</div>
     </div>
-    <div class="hero-stat">
-      <div class="hs-val">26M</div>
-      <div class="hs-label">customers on the ERCOT grid</div>
+    <div class="hero-stat warn">
+      <div class="hs-val">15×</div>
+      <div class="hs-label">more expensive than a normal day when the grid gets tight</div>
     </div>
     <div class="hero-stat green">
-      <div class="hs-val">15-day</div>
-      <div class="hs-label">forecast horizon — where the alpha lives</div>
+      <div class="hs-val">15 days</div>
+      <div class="hs-label">advance warning — enough time to lock in a forward contract</div>
     </div>
-    <div class="hero-stat">
-      <div class="hs-val">DeepMind</div>
-      <div class="hs-label">WeatherNext 2 — beats ECMWF past day 5</div>
+    <div class="hero-stat green">
+      <div class="hs-val">Daily</div>
+      <div class="hs-label">automated signal delivered every morning before markets open</div>
     </div>
   </div>
 
-  <div class="hero-how">
+  <!-- Problem / Solution -->
+  <div style="display:flex;gap:12px;margin-bottom:20px;">
+    <div class="how-step" style="flex:1;border-color:rgba(192,57,43,0.25);background:rgba(192,57,43,0.03)">
+      <div class="hs-num" style="color:var(--elevated)">THE PROBLEM</div>
+      <div class="hs-title">You're buying electricity at spot prices</div>
+      <div class="hs-desc">Most industrial buyers ride the spot market by default. That works fine 90% of the time — but the other 10% can wipe out months of margin. The Feb 2021 Texas freeze sent electricity bills to $16,000/day for a mid-size manufacturer running on spot.</div>
+    </div>
+    <div class="how-arrow" style="padding-top:20px;">→</div>
+    <div class="how-step" style="flex:1;border-color:rgba(26,122,74,0.25);background:rgba(26,122,74,0.03)">
+      <div class="hs-num" style="color:var(--accent)">THE FIX</div>
+      <div class="hs-title">Lock in a forward contract before the spike</div>
+      <div class="hs-desc">When WeatherAlpha flags an elevated risk day, your energy manager has 15 days to call your broker and buy a fixed-price contract for that window. You pay a small premium. You avoid the spike. Simple.</div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div style="margin-bottom:8px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text)">How it works</div>
+  <div class="hero-how" style="margin-bottom:20px;">
     <div class="how-step">
-      <div class="hs-num">01 · WEATHER</div>
-      <div class="hs-title">DeepMind Forecast</div>
-      <div class="hs-desc">WeatherNext 2 ensemble — wind, temperature, cloud cover, 15 days ahead</div>
+      <div class="hs-num">01</div>
+      <div class="hs-title">Weather forecast</div>
+      <div class="hs-desc">DeepMind's WeatherNext 2 model predicts wind, heat &amp; cloud cover 15 days out — more accurate than any government model past day 5</div>
     </div>
     <div class="how-arrow">→</div>
     <div class="how-step">
-      <div class="hs-num">02 · GRID</div>
-      <div class="hs-title">ERCOT Price History</div>
-      <div class="hs-desc">2 years of DAM &amp; RTM settlement data pulled live from ERCOT's API</div>
+      <div class="hs-num">02</div>
+      <div class="hs-title">Grid stress model</div>
+      <div class="hs-desc">Low wind + high heat = renewables drop + demand surges. The model calculates how tight the Texas grid will be on each day</div>
     </div>
     <div class="how-arrow">→</div>
     <div class="how-step">
-      <div class="hs-num">03 · MODEL</div>
-      <div class="hs-title">Spike Probability</div>
-      <div class="hs-desc">Calibrated logistic regression maps weather → grid tightness → price risk</div>
+      <div class="hs-num">03</div>
+      <div class="hs-title">Spike probability</div>
+      <div class="hs-desc">Each day gets a 0–100% spike probability. Above 50%? Flag it. Your energy manager gets a plain-English alert with the key drivers</div>
     </div>
     <div class="how-arrow">→</div>
     <div class="how-step">
-      <div class="hs-num">04 · SIGNAL</div>
-      <div class="hs-title">Actionable Output</div>
-      <div class="hs-desc">Plain-English daily signal — hedge, hold, or watch — with key drivers explained</div>
+      <div class="hs-num">04</div>
+      <div class="hs-title">You act early</div>
+      <div class="hs-desc">Lock in a forward contract for flagged days. Pay a small known premium. Avoid a potentially massive spot exposure. Repeat daily.</div>
     </div>
   </div>
 
   <div class="hero-cta">
-    <button class="cta-btn" onclick="document.getElementById('app-shell').scrollIntoView({{behavior:'smooth'}})">↓ View Live Dashboard</button>
-    <span class="cta-note">Updated daily · ERCOT HB_BUSAVG hub · Texas</span>
+    <button class="cta-btn" onclick="document.getElementById('app-shell').scrollIntoView({{behavior:'smooth'}})">↓ See the live 15-day forecast</button>
+    <span class="cta-note">Texas grid (ERCOT) · Updated daily · Free during beta</span>
   </div>
 </div>
 
