@@ -450,6 +450,21 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
   .cta-btn:hover {{ opacity: 0.88; }}
   .cta-note {{ font-size: 11px; color: var(--text); }}
 
+  /* BOTTOM LINE */
+  .bottom-line-banner {{ border-radius: 10px; padding: 16px 20px; margin-bottom: 2px; border-width: 1px; border-style: solid; }}
+  .bl-verdict {{ font-size: 18px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 6px; }}
+  .bl-action {{ font-size: 13px; font-weight: 600; margin-bottom: 4px; }}
+  .bl-reason {{ font-size: 12px; line-height: 1.6; }}
+
+  /* WEEK VERDICT */
+  #week-verdict {{ flex-shrink: 0; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }}
+  #week-verdict .wv-icon {{ font-size: 18px; flex-shrink: 0; }}
+  #week-verdict .wv-text {{ flex: 1; }}
+  #week-verdict .wv-label {{ font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text); margin-bottom: 2px; }}
+  #week-verdict .wv-line {{ font-size: 13px; font-weight: 700; color: var(--bright); }}
+  #week-verdict .wv-sub {{ font-size: 11px; color: var(--text); margin-top: 1px; }}
+  #week-verdict .wv-badge {{ font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }}
+
   /* Scrollbar */
   ::-webkit-scrollbar {{ width: 4px; }}
   ::-webkit-scrollbar-track {{ background: transparent; }}
@@ -587,6 +602,7 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
 
   <!-- CONTENT -->
   <div id="content">
+    <div id="week-verdict"></div>
     <div id="sparkline-strip">
       <div class="strip-label">
         <span>15-Day Price Forecast — click any day</span>
@@ -714,6 +730,43 @@ function renderSparkline() {{
   }});
 }}
 
+function buildWeekVerdict() {{
+  const elevated = DATA.filter(d => d.signal === 'ELEVATED');
+  const maxSpike = Math.max(...DATA.map(d => d.spike));
+  const nextElev = elevated[0];
+
+  let icon, line, sub, badgeBg, badgeCol;
+
+  if (elevated.length === 0) {{
+    icon = '✅';
+    line = 'No action needed this week. Sit tight.';
+    sub = `Highest spike probability is ${{maxSpike.toFixed(0)}}% — below the 50% alert threshold. Grid looks well-supplied.`;
+    badgeBg = 'rgba(26,122,74,0.1)'; badgeCol = C.accent;
+  }} else if (elevated.length === 1) {{
+    icon = '⚠️';
+    line = `One day to hedge: ${{fmtDate(nextElev.date)}}.`;
+    sub = `${{nextElev.spike.toFixed(0)}}% spike probability. Call your broker and consider a fixed-price contract for that day.`;
+    badgeBg = 'rgba(212,132,26,0.1)'; badgeCol = C.warn;
+  }} else {{
+    icon = '🚨';
+    line = `Hedge ${{elevated.length}} days: ${{elevated.map(e => fmtDate(e.date)).join(', ')}}.`;
+    sub = `Multiple elevated-risk days in the window. Lock in forward contracts now before prices move.`;
+    badgeBg = 'rgba(192,57,43,0.1)'; badgeCol = C.elevated;
+  }}
+
+  document.getElementById('week-verdict').innerHTML = `
+    <div class="wv-icon">${{icon}}</div>
+    <div class="wv-text">
+      <div class="wv-label">Weekly Bottom Line</div>
+      <div class="wv-line">${{line}}</div>
+      <div class="wv-sub">${{sub}}</div>
+    </div>
+    <div class="wv-badge" style="background:${{badgeBg}};color:${{badgeCol}}">
+      ${{elevated.length === 0 ? 'ALL CLEAR' : elevated.length === 1 ? '1 ALERT' : elevated.length + ' ALERTS'}}
+    </div>
+  `;
+}}
+
 function renderDayDetail() {{
   const d = DATA[activeDay];
   const isElev = d.signal === 'ELEVATED';
@@ -724,9 +777,21 @@ function renderDayDetail() {{
   const tempOk  = d.temp <= 72;
   const tightOk = d.tightness <= 20500;
 
-  const actionText = isElev
-    ? `Spike probability is <strong style="color:${{C.elevated}}">${{d.spike.toFixed(0)}}%</strong> — above the 50% threshold. Low wind and high cloud cover are squeezing renewables while demand stays elevated. Consider locking in forward contracts or reducing spot exposure on this day.`
-    : `Grid looks well-supplied. Wind is delivering ${{(d.renewables/1000).toFixed(1)}}K MW of renewable capacity. DAM prices should remain subdued unless an unexpected demand event occurs.`;
+  // Bottom line verdict for this specific day
+  let blVerdict, blAction, blReason;
+  if (d.spike > 55) {{
+    blVerdict = '🚨 Hedge this day.';
+    blAction = `Lock in a fixed-price contract for ${{fmtDate(d.date)}} before spot prices move.`;
+    blReason = `${{d.spike.toFixed(0)}}% spike probability. ${{!windOk ? `Wind is low at ${{d.wind}} mph — renewables are underdelivering. ` : ''}}${{!cloudOk ? `Cloud cover at ${{d.cloud}}% is suppressing solar. ` : ''}}${{!tempOk ? `Heat at ${{d.temp}}°F is driving cooling load up. ` : ''}}Grid tightness at ${{(d.tightness/1000).toFixed(1)}}K MW.`;
+  }} else if (d.spike > 42) {{
+    blVerdict = '👀 Watch this day.';
+    blAction = `No immediate action needed, but monitor conditions as ${{fmtDate(d.date)}} approaches.`;
+    blReason = `Spike probability is ${{d.spike.toFixed(0)}}% — elevated but not yet at the hedge threshold. If wind drops or cloud cover increases in the next few days, reassess.`;
+  }} else {{
+    blVerdict = '✅ No action needed.';
+    blAction = `Ride spot pricing on ${{fmtDate(d.date)}} — grid looks well-supplied.`;
+    blReason = `Spike probability is only ${{d.spike.toFixed(0)}}%. Wind at ${{d.wind}} mph is delivering strong renewable output and the grid has plenty of headroom.`;
+  }}
 
   const watches = [];
   if (!windOk || d.wind < 16) watches.push(`Wind drops below 12 mph (currently ${{d.wind}} mph)`);
@@ -734,10 +799,20 @@ function renderDayDetail() {{
   if (!tempOk || d.temp > 68) watches.push(`Temp exceeds 85°F — cooling demand surge (currently ${{d.temp}}°F)`);
   watches.push(`RTM diverges more than 20% above DAM settlement`);
 
+  const actionText = isElev
+    ? `Spike probability is <strong style="color:${{C.elevated}}">${{d.spike.toFixed(0)}}%</strong> — above the 50% threshold. Low wind and high cloud cover are squeezing renewables while demand stays elevated. Consider locking in forward contracts or reducing spot exposure on this day.`
+    : `Grid looks well-supplied. Wind is delivering ${{(d.renewables/1000).toFixed(1)}}K MW of renewable capacity. DAM prices should remain subdued unless an unexpected demand event occurs.`;
+
   document.getElementById('day-detail').innerHTML = `
     <div class="detail-header">
       <div class="detail-date">${{new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', {{ weekday:'long', month:'long', day:'numeric' }})}}</div>
       <div class="detail-signal" style="background:${{col}}18;color:${{col}};border:1px solid ${{col}}44">${{d.signal}}</div>
+    </div>
+
+    <div class="bottom-line-banner" style="background:${{col}}0d;border-color:${{col}}33">
+      <div class="bl-verdict" style="color:${{col}}">${{blVerdict}}</div>
+      <div class="bl-action" style="color:var(--bright)">${{blAction}}</div>
+      <div class="bl-reason" style="color:var(--text)">${{blReason}}</div>
     </div>
 
     <div class="price-card">
@@ -923,6 +998,7 @@ function selectDay(i) {{
 buildSidebar();
 buildSummary();
 buildSignal();
+buildWeekVerdict();
 renderSparkline();
 renderDayDetail();
 </script>
