@@ -325,6 +325,8 @@ def step_generate_dashboard(forecast: pd.DataFrame, zone: str) -> None:
   .dsig-elevated {{ background: var(--elevated-light); color: var(--elevated); }}
   .dsig-moderate {{ color: var(--text); }}
   .day-item .row2 {{ display: flex; justify-content: space-between; margin-top: 3px; font-size: 11px; color: var(--text); }}
+  .day-item .spike-bar-bg {{ height: 3px; background: var(--border2); border-radius: 2px; margin-top: 5px; overflow: hidden; }}
+  .day-item .spike-bar-fg {{ height: 100%; border-radius: 2px; transition: width 0.2s; }}
 
   /* CONTENT */
   #content {{ flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }}
@@ -546,7 +548,9 @@ function fmtDate(iso) {{
 
 function buildSidebar() {{
   const el = document.getElementById('day-list');
-  el.innerHTML = DATA.map((d, i) => `
+  el.innerHTML = DATA.map((d, i) => {{
+    const barColor = d.spike > 50 ? C.elevated : d.spike > 42 ? C.warn : C.accent;
+    return `
     <div class="day-item ${{i === 0 ? 'active' : ''}}" onclick="selectDay(${{i}})" id="day-${{i}}">
       <div class="row1">
         <span class="dname">${{fmtDate(d.date)}}</span>
@@ -556,10 +560,13 @@ function buildSidebar() {{
       </div>
       <div class="row2">
         <span>${{d.temp}}°F</span>
-        <span style="color:${{d.spike > 50 ? C.elevated : C.text}};font-weight:${{d.spike > 50 ? 600 : 400}}">${{d.spike.toFixed(0)}}%</span>
+        <span style="color:${{barColor}};font-weight:${{d.spike > 50 ? 600 : 400}}">${{d.spike.toFixed(0)}}%</span>
       </div>
-    </div>
-  `).join('');
+      <div class="spike-bar-bg">
+        <div class="spike-bar-fg" style="width:${{d.spike}}%;background:${{barColor}}"></div>
+      </div>
+    </div>`;
+  }}).join('');
 }}
 
 function renderSparkline() {{
